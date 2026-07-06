@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 output/
 stint_drivers.json
+
+# Generated analysis outputs (written into each data folder at runtime)
+race_analysis.csv
+sessions.csv

@@ -8,6 +8,12 @@ Pipeline:
      prepopulated from the file note. Edit it all at once, save, and re-run.
   4. Aggregate per driver per race and write a CSV.
 
+The driver-assignments file persists inside the telemetry input folder
+(``<input>/driver_assignments.txt`` by default), so each data folder carries
+its own driver tagging. When that file already has driver names filled in, it
+is loaded and reused automatically -- no need to re-tag. Pass an explicit
+``--assignments PATH`` to read/write the config somewhere else.
+
 Usage:
     python analyze.py [--input FOLDER] [--output CSV]
                       [--list-sessions] [--reuse-assignments] [--template-only]
@@ -16,7 +22,12 @@ Usage:
 CSV columns (one row per driver per race):
     driver, race, date, best_lap_s, best_lap, avg_hot_lap_s, avg_hot_lap,
     median_hot_lap_s, median_hot_lap, p90_hot_lap_s, p90_hot_lap,
-    total_time_in_car_s, total_time_in_car, total_laps, hot_laps, vsc_laps
+    total_time_in_car_s, total_time_in_car, total_laps, hot_laps, vsc_laps,
+    pit_in_laps, pit_in_time_s, pit_in_time
+
+``total_time_in_car`` excludes recovered pit-in laps (telemetry logged past
+the lap table); that time is reported separately as ``pit_in_time`` so a car
+left running in the garage cannot inflate the in-car total.
 """
 
 from __future__ import annotations
@@ -48,8 +59,23 @@ from xrk_parser import Session, find_xrk_files, parse_file
 
 DEFAULT_INPUT = "~/Documents/Summit Point"
 DEFAULT_OUTPUT = "race_analysis.csv"
+# File name (not full path) used for the persisted, editable driver config.
+# By default it lives inside the telemetry input folder so each data folder
+# carries its own driver tagging.
 DEFAULT_ASSIGNMENTS = "driver_assignments.txt"
 DEFAULT_SESSIONS_CSV = "sessions.csv"
+
+
+def resolve_config_path(explicit: str | None, folder: Path, default_name: str) -> Path:
+    """Resolve a config/companion file path.
+
+    If the user passed an explicit path, honor it (with ``~`` expansion).
+    Otherwise place the file inside the telemetry input ``folder`` so it
+    persists alongside the data it describes.
+    """
+    if explicit is not None:
+        return Path(explicit).expanduser()
+    return folder / default_name
 
 
 def _fmt_time(seconds: float) -> str:
@@ -101,13 +127,23 @@ def aggregate(sessions: list[Session], drivers: dict[str, str]) -> pd.DataFrame:
                 "total_time_s": 0.0,
                 "total_laps": 0,
                 "vsc_laps": 0,
+                "pit_in_time_s": 0.0,
+                "pit_in_laps": 0,
             },
         )
         if s.start_dt:
             rec["dates"].add(s.start_dt.date())
-        rec["total_time_s"] += s.duration_s
         for lap in s.laps:
             rec["total_laps"] += 1
+            # Recovered pit-in laps (telemetry past libxrk's lap table) are
+            # tracked separately: their duration is uncertain (a car sent to
+            # the garage with the logger on can log a large lump) and must not
+            # silently inflate time-in-car.
+            if lap.synthetic:
+                rec["pit_in_time_s"] += lap.lap_time_s
+                rec["pit_in_laps"] += 1
+            else:
+                rec["total_time_s"] += lap.lap_time_s
             if is_stat_lap(lap):
                 rec["hot_laps_s"].append(lap.lap_time_s)
             elif lap.lap_type == VSC:
@@ -139,6 +175,9 @@ def aggregate(sessions: list[Session], drivers: dict[str, str]) -> pd.DataFrame:
                 "total_laps": rec["total_laps"],
                 "hot_laps": len(hot),
                 "vsc_laps": rec["vsc_laps"],
+                "pit_in_laps": rec["pit_in_laps"],
+                "pit_in_time_s": round(rec["pit_in_time_s"], 1),
+                "pit_in_time": _fmt_duration(rec["pit_in_time_s"]),
             }
         )
 
@@ -155,16 +194,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     p.add_argument("--input", default=DEFAULT_INPUT, help="Folder of .xrk files")
-    p.add_argument("--output", default=DEFAULT_OUTPUT, help="Output CSV path")
+    p.add_argument(
+        "--output",
+        default=None,
+        help="Output CSV path (defaults to <input folder>/race_analysis.csv).",
+    )
     p.add_argument(
         "--assignments",
-        default=DEFAULT_ASSIGNMENTS,
-        help="Editable file mapping each stint file -> driver name.",
+        default=None,
+        help="Editable file mapping each stint file -> driver name. Defaults "
+        "to <input>/driver_assignments.txt so tagging persists with the data.",
     )
     p.add_argument(
         "--sessions-csv",
-        default=DEFAULT_SESSIONS_CSV,
-        help="Where to write the per-session list (start/end + best lap).",
+        default=None,
+        help="Where to write the per-session list (start/end + best lap). "
+        "Defaults to <input>/sessions.csv.",
     )
     p.add_argument(
         "--reuse-assignments",
@@ -238,8 +283,10 @@ def main(argv: list[str] | None = None) -> None:
     sessions = load_and_classify(folder, cfg)
     print(f"Parsed {len(sessions)} sessions.")
 
-    sessions_csv = Path(args.sessions_csv).expanduser()
-    assignments_path = Path(args.assignments).expanduser()
+    sessions_csv = resolve_config_path(args.sessions_csv, folder, DEFAULT_SESSIONS_CSV)
+    assignments_path = resolve_config_path(
+        args.assignments, folder, DEFAULT_ASSIGNMENTS
+    )
 
     if args.list_sessions:
         rows = session_summaries(sessions)
@@ -249,15 +296,27 @@ def main(argv: list[str] | None = None) -> None:
         write_assignments_file(rows, prefill, assignments_path)
         print(
             f"\nEdit {assignments_path} (one driver name per stint), then run "
-            "again with --reuse-assignments to build the analysis CSV."
+            "again to build the analysis CSV. The file stays in your telemetry "
+            "folder and is reused automatically once names are filled in."
         )
         return
+
+    # If a populated config already lives in the folder, reuse it automatically
+    # so the user does not have to re-tag drivers on every run.
+    saved = load_assignments(assignments_path)
+    has_saved = any(v for v in saved.values())
+    reuse = args.reuse_assignments or has_saved
+    if has_saved and not args.reuse_assignments:
+        print(
+            f"\nFound existing driver assignments in {assignments_path}; "
+            "reusing them (pass --assignments to override)."
+        )
 
     drivers = assign_drivers(
         sessions,
         assignments_path=assignments_path,
         sessions_csv=sessions_csv,
-        reuse=args.reuse_assignments,
+        reuse=reuse,
         suggest_clusters=args.suggest_clusters,
         use_profile=args.profile,
         profile_distance=args.profile_distance,
@@ -266,7 +325,7 @@ def main(argv: list[str] | None = None) -> None:
     )
 
     df = aggregate(sessions, drivers)
-    out_path = Path(args.output).expanduser()
+    out_path = resolve_config_path(args.output, folder, DEFAULT_OUTPUT)
     df.to_csv(out_path, index=False)
 
     print(f"\nWrote {len(df)} rows to {out_path}\n")

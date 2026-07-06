@@ -7,8 +7,10 @@ started and its best lap time:
   * ``session_summaries`` / ``write_session_list`` produce that list.
   * ``tag_sessions_interactively`` prompts you per session (showing race,
     start time, and best lap) to enter a driver name.
-  * Alternatively a ``driver_assignments.json`` template ({file: name}) can be
-    hand-edited and reused with ``--reuse-assignments``.
+  * Alternatively an editable ``driver_assignments.txt`` template
+    (``file = name`` lines) can be hand-edited and reused. This file persists
+    inside the telemetry input folder, so once it has names filled in it is
+    loaded and reused automatically on subsequent runs.
 
 Optional helpers for pre-filling names you have not tagged yet:
 
@@ -135,7 +137,8 @@ _ASSIGN_HEADER = """\
 #   - Leave a line blank to mark that stint Unassigned (e.g. short in/out blips).
 #   - You can edit freely and reorder your thinking; only the 'file = name'
 #     lines are read. Lines starting with '#' are comments/context.
-# When done, run:  python analyze.py --reuse-assignments
+# This file lives in your telemetry folder; once names are filled in they are
+# reused automatically. When done, just run again:  python analyze.py
 #
 # Optional profiling: tag a few stints, save, then run with --profile to
 # pre-fill the rest from driving-style fingerprints (review suggestions!).
@@ -300,7 +303,8 @@ def assign_drivers(
 
     print(
         f"\nOpen {assignments_path} in your editor, fill in a driver name after "
-        "each '=', save, then run:\n  python analyze.py --reuse-assignments"
+        "each '=', save, then run again:\n  python analyze.py --input "
+        f"'{assignments_path.parent}'"
     )
     return {f: (prefill.get(f) or UNASSIGNED) for f in files}
 

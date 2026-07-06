@@ -75,6 +75,9 @@ class Lap:
     n_speed_samples: int = 0
     # Lap classification, filled in later by lap_analysis.
     lap_type: str = "unknown"
+    # True when this lap was synthesised from telemetry that continues past
+    # libxrk's lap table (a dropped pit-in lap with no start/finish crossing).
+    synthetic: bool = False
 
 
 @dataclass
@@ -191,11 +194,87 @@ def parse_file(path: str | Path, crawl_speed_ms: float | None = None) -> Session
         _fill_speed_stats(lap, speed_df, crawl_speed_ms)
         session.laps.append(lap)
 
+    _append_trailing_lap(session, speed_df, crawl_speed_ms, start_dt)
+
     if session.laps:
         session.duration_s = sum(l.lap_time_s for l in session.laps)
 
     session.channel_stats = _channel_stats(log)
     return session
+
+
+# Telemetry sometimes keeps logging after libxrk's lap table ends (a dropped
+# pit-in lap that never crossed start/finish). We recover that driving time as
+# a single synthetic in-lap, trimmed at the first sustained stop so idle
+# pit-box time is not counted.
+TRAILING_MIN_DRIVE_S = 20.0  # ignore trivial coast-down after the last lap
+TRAILING_STOP_S = 15.0  # sustained below-crawl stretch that marks "parked"
+TRAILING_MIN_LAPS = 4  # only recover a pit-in on a real stint, not a blip
+
+
+def _trailing_drive(
+    speed_df: pd.DataFrame | None, last_end_ms: int, crawl_ms: float
+) -> tuple[int, float] | None:
+    """Driving time after the last lap-table row, trimmed at the first stop.
+
+    Returns ``(cutoff_ms, drive_s)`` for the moving portion of telemetry past
+    ``last_end_ms``, or ``None`` when there is no meaningful trailing driving.
+    """
+    if speed_df is None:
+        return None
+    seg = speed_df[speed_df["timecodes"] >= last_end_ms]
+    if len(seg) == 0:
+        return None
+    times = seg["timecodes"].to_numpy()
+    speeds = seg["speed"].to_numpy()
+    if times[-1] <= last_end_ms:
+        return None
+
+    below = speeds < crawl_ms
+    cutoff = int(times[-1])
+    run_start_idx: int | None = None
+    for i, flag in enumerate(below):
+        if flag:
+            if run_start_idx is None:
+                run_start_idx = i
+            if (times[i] - times[run_start_idx]) / 1000.0 >= TRAILING_STOP_S:
+                cutoff = int(times[run_start_idx])
+                break
+        else:
+            run_start_idx = None
+
+    drive_s = (cutoff - last_end_ms) / 1000.0
+    if drive_s < TRAILING_MIN_DRIVE_S:
+        return None
+    return cutoff, float(drive_s)
+
+
+def _append_trailing_lap(
+    session: Session,
+    speed_df: pd.DataFrame | None,
+    crawl_ms: float,
+    start_dt: datetime | None,
+) -> None:
+    if len(session.laps) < TRAILING_MIN_LAPS:
+        return
+    last_end = session.laps[-1].end_ms
+    trailing = _trailing_drive(speed_df, last_end, crawl_ms)
+    if trailing is None:
+        return
+    cutoff_ms, drive_s = trailing
+    abs_start = (
+        start_dt + timedelta(milliseconds=last_end) if start_dt else None
+    )
+    lap = Lap(
+        num=session.laps[-1].num + 1,
+        start_ms=last_end,
+        end_ms=cutoff_ms,
+        lap_time_s=drive_s,
+        abs_start=abs_start,
+        synthetic=True,
+    )
+    _fill_speed_stats(lap, speed_df, crawl_ms)
+    session.laps.append(lap)
 
 
 def _fill_speed_stats(lap: Lap, speed_df: pd.DataFrame | None, crawl_ms: float) -> None:

@@ -11,68 +11,33 @@
 # ---------------------------------------------------------------------------
 
 
-# ===== Palmer NEGT Race 1 June 2026 =====
+# ===== Jeff and Steve =====
 
-# [ 1] 06/26/2026 15:00:31 - 15:42:08 (41:38) | best 1:28.056 | 23 hot / 27 laps | note: -
-Palmer NEGT Race 1 June 2026_E36_Summit WV_Generic testing_a_2201.xrk = Chris
+# [ 1] 05/08/2026 18:25:39 - 18:27:29 (1:50) | best 0:35.311 | 0 hot / 2 laps | note: -
+Jeff and Steve_E36_Thomps 1.5CT_Generic testing_a_2043.xrk = Jeff
 
-# [ 2] 06/26/2026 15:46:26 - 16:18:01 (31:36) | best 1:31.631 | 19 hot / 21 laps | note: -
-Palmer NEGT Race 1 June 2026_E36_Summit WV_Generic testing_a_2203.xrk = Jeff
+# [ 2] 05/08/2026 18:58:56 - 20:20:44 (81:48) | best 1:24.647 | 40 hot / 50 laps | note: -
+Jeff and Steve_E36_Thomps 1.5CT_Generic testing_a_2045.xrk = Jeff
 
-# [ 3] 06/26/2026 16:22:28 - 16:38:32 (16:04) | best 1:28.793 | 9 hot / 11 laps | note: -
-Palmer NEGT Race 1 June 2026_E36_Summit WV_Generic testing_a_2205.xrk = Steve
+# [ 3] 05/08/2026 20:23:52 - 21:10:39 (46:47) | best 1:24.453 | 24 hot / 29 laps | note: -
+Jeff and Steve_E36_Thomps 1.5CT_Generic testing_a_2048.xrk = Steve
 
-# [ 4] 06/26/2026 16:58:18 - 17:03:37 (5:19) | best 1:30.426 | 2 hot / 4 laps | note: -
-Palmer NEGT Race 1 June 2026_E36_Summit WV_Generic testing_a_2208.xrk = Steve
+# [ 4] 05/08/2026 21:26:45 - 22:05:23 (38:39) | best 1:25.185 | 22 hot / 25 laps | note: -
+Jeff and Steve_E36_Thomps 1.5CT_Generic testing_a_2052.xrk = Steve
 
-# ===== Summit Point AER Race 1 =====
+# ===== Race =====
 
-# [ 5] 06/27/2026 09:00:37 - 10:36:06 (95:30) | best 1:25.802 | 54 hot / 60 laps | note: -
-Summit Point AER Race 1_E36_Summit WV_Generic testing_a_2217.xrk = Steve
+# [ 5] 05/09/2026 18:25:40 - 18:26:54 (1:14) | best 0:30.087 | 0 hot / 2 laps | note: -
+Race_E36_Thomps 1.5CT_Generic testing_a_2072.xrk = Chris
 
-# [ 6] 06/27/2026 10:38:36 - 11:05:44 (27:09) | best 1:28.284 | 14 hot / 17 laps | note: -
-Summit Point AER Race 1_E36_Summit WV_Generic testing_a_2218.xrk = Chris
+# [ 6] 05/09/2026 18:53:29 - 20:13:40 (80:12) | best 1:40.949 | 36 hot / 43 laps | note: -
+Race_E36_Thomps 1.5CT_Generic testing_a_2075.xrk = Chris
 
-# [ 7] 06/27/2026 11:22:14 - 12:13:53 (51:39) | best 1:25.637 | 31 hot / 35 laps | note: -
-Summit Point AER Race 1_E36_Summit WV_Generic testing_a_2219.xrk = Chris
+# [ 7] 05/09/2026 20:18:48 - 20:27:36 (8:48) | best 2:01.097 | 0 hot / 4 laps | note: -
+Race_E36_Thomps 1.5CT_Generic testing_a_2079.xrk = Dave
 
-# [ 8] 06/27/2026 12:18:13 - 13:50:54 (92:41) | best 1:27.301 | 61 hot / 63 laps | note: -
-Summit Point AER Race 1_E36_Summit WV_Generic testing_a_2220.xrk = Jeff
+# [ 8] 05/09/2026 20:32:32 - 21:11:24 (38:52) | best 1:40.854 | 20 hot / 22 laps | note: -
+Race_E36_Thomps 1.5CT_Generic testing_a_2080.xrk = Jeff
 
-# [ 9] 06/27/2026 13:55:15 - 15:10:31 (75:16) | best 1:26.272 | 50 hot / 52 laps | note: -
-Summit Point AER Race 1_E36_Summit WV_Generic testing_a_2222.xrk = Steve
-
-# [10] 06/27/2026 15:14:50 - 16:08:23 (53:33) | best 1:25.874 | 35 hot / 37 laps | note: -
-Summit Point AER Race 1_E36_Summit WV_Generic testing_a_2224.xrk = Chris
-
-# [11] 06/27/2026 16:46:31 - 16:47:01 (0:31) | best 0:30.543 | 0 hot / 1 laps | note: -
-Summit Point AER Race 1_E36_Summit WV_Generic testing_a_2226.xrk = Chris
-
-# [12] 06/27/2026 16:51:56 - 17:01:34 (9:39) | best 1:29.849 | 5 hot / 7 laps | note: -
-Summit Point AER Race 1_E36_Summit WV_Generic testing_a_2227.xrk = Chris
-
-# ===== Summit Point AER Race 2 =====
-
-# [13] 06/28/2026 09:00:31 - 09:56:02 (55:31) | best 1:28.012 | 26 hot / 33 laps | note: -
-Summit Point AER Race 2_E36_Summit WV_Generic testing_a_2235.xrk = Jeff
-
-# [14] 06/28/2026 10:28:27 - 11:00:10 (31:43) | best 1:27.901 | 16 hot / 20 laps | note: -
-Summit Point AER Race 2_E36_Summit WV_Generic testing_a_2237.xrk = Jeff
-
-# [15] 06/28/2026 11:04:33 - 11:24:34 (20:02) | best 1:27.170 | 10 hot / 13 laps | note: -
-Summit Point AER Race 2_E36_Summit WV_Generic testing_a_2239.xrk = Steve
-
-# [16] 06/28/2026 11:51:11 - 11:51:41 (0:30) | best 0:30.315 | 0 hot / 1 laps | note: -
-Summit Point AER Race 2_E36_Summit WV_Generic testing_a_2241.xrk = Steve
-
-# [17] 06/28/2026 11:57:51 - 13:11:40 (73:50) | best 1:27.054 | 49 hot / 51 laps | note: -
-Summit Point AER Race 2_E36_Summit WV_Generic testing_a_2243.xrk = Steve
-
-# [18] 06/28/2026 13:15:57 - 14:13:28 (57:31) | best 1:26.881 | 38 hot / 40 laps | note: -
-Summit Point AER Race 2_E36_Summit WV_Generic testing_a_2244.xrk = Chris
-
-# [19] 06/28/2026 14:35:39 - 15:40:00 (64:22) | best 1:28.491 | 38 hot / 42 laps | note: -
-Summit Point AER Race 2_E36_Summit WV_Generic testing_a_2246.xrk = Jeff
-
-# [20] 06/28/2026 15:44:21 - 17:02:55 (78:35) | best 1:27.187 | 51 hot / 53 laps | note: -
-Summit Point AER Race 2_E36_Summit WV_Generic testing_a_2248.xrk = Steve
+# [ 9] 05/09/2026 21:14:19 - 22:01:52 (47:34) | best 1:38.709 | 26 hot / 28 laps | note: -
+Race_E36_Thomps 1.5CT_Generic testing_a_2082.xrk = Steve

@@ -79,8 +79,11 @@ Outputs are written to `output/`:
 
 ## Notes
 
-- Assign real driver names once; they are cached in `stint_drivers.json`
-  (keyed by filename). You can also hand-edit that file's `assignments` map.
+- Assign real driver names once; they persist in an editable
+  `driver_assignments.txt` file **inside your telemetry folder** (keyed by
+  stint filename). On later runs against that same folder the assignments load
+  and reuse automatically, so you never have to re-tag. Point elsewhere with
+  `--assignments PATH` if needed.
 - Fingerprint clustering only groups stints that are genuinely similar in pace
   and style; when drivers are within a second or two of each other it will fall
   back to per-stint prompts. That is expected.
