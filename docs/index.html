@@ -45,7 +45,6 @@
   .seg button:last-child { border-right: 0; }
   .seg button.on { background: var(--purple); color: white; }
   .seg.quiet button { font-weight: 500; }
-  button.which { appearance: none; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 14px; font-weight: 600; padding: 8px 0 0; cursor: pointer; }
   .pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
   button.pill { border: 1px solid #d6d3d1; background: white; color: var(--ink); border-radius: 999px; min-width: 44px; min-height: 40px; padding: 6px 12px; font: inherit; font-weight: 600; cursor: pointer; }
   button.pill.on { background: var(--purple); border-color: var(--purple); color: white; }
@@ -73,8 +72,6 @@
     </div>
   </div>
   <div class="scroll" id="laps"></div>
-  <button type="button" class="which" id="stints-toggle" aria-expanded="false" aria-controls="stints">Which laps</button>
-  <p class="muted small" id="stints" hidden></p>
   <p class="muted small" id="optimal-note">Optimal adds that driver's fastest of three sectors from these laps. The sectors split the lap in the middle of the front straight, the straight before Turn 4, and the straight before Turn 6. Theoretical adds the fastest time on every corner and every straight. Neither is a lap they drove.</p>
   <section class="corner">
     <h2 id="title"></h2>
@@ -201,8 +198,6 @@ function renderLaps() {
     headers.map(h => "<th>" + h + "</th>").join("") +
     "</tr></thead><tbody>" + body + "</tbody></table>";
   document.getElementById("optimal-note").hidden = !summary;
-  document.getElementById("stints").textContent = DATA.drivers.map((driver, d) =>
-    driver + ": " + DATA.stint[d].slice(0, lapCount).join(", ")).join(". ") + ".";
 }
 
 function drawMap(selected) {
@@ -330,14 +325,6 @@ function setCount(n) {
 
 document.querySelectorAll("#depth button").forEach(button => {
   button.addEventListener("click", () => setCount(Number(button.dataset.n)));
-});
-document.getElementById("stints-toggle").addEventListener("click", () => {
-  const list = document.getElementById("stints");
-  const open = list.hidden;
-  list.hidden = !open;
-  const button = document.getElementById("stints-toggle");
-  button.setAttribute("aria-expanded", open ? "true" : "false");
-  button.textContent = open ? "Hide laps" : "Which laps";
 });
 document.querySelectorAll("#lap-view button").forEach(button => {
   button.addEventListener("click", () => {
