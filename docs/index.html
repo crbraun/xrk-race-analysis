@@ -39,8 +39,12 @@
     <button class="pill" type="button" data-n="5">Top 5</button>
     <button class="pill" type="button" data-n="10">Top 10</button>
   </div>
+  <div class="pills" id="lap-view">
+    <button class="pill on" type="button" data-view="summary">Summary</button>
+    <button class="pill" type="button" data-view="laps">Lap times</button>
+  </div>
   <div class="scroll" id="laps"></div>
-  <p class="muted small" id="stints"></p>
+  <p class="muted small" id="stints" hidden></p>
   <p class="muted small" id="optimal-note">Optimal adds that driver's fastest of three sectors from these laps. The sectors split the lap in the middle of the front straight, the straight before Turn 4, and the straight before Turn 6. Theoretical adds the fastest time on every corner and every straight. Neither is a lap they drove.</p>
   <h2 id="title"></h2>
   <p class="small">Tap a turn.</p>
@@ -125,6 +129,7 @@ function passIndex(laps) {
 
 const asked = Number(new URLSearchParams(location.search).get("n"));
 let lapCount = [3, 5, 10].includes(asked) ? asked : 3;
+let lapView = "summary";
 
 function bestSum(driver, key) {
   const laps = DATA[key][driver].slice(0, lapCount);
@@ -142,18 +147,27 @@ function renderLaps() {
   const theoretical = DATA.drivers.map((_, d) => bestSum(d, "piece"));
   const bestOptimal = Math.min(...optimal);
   const bestTheoretical = Math.min(...theoretical);
+  const fastestEach = times.map(row => row[0]);
+  const bestFastest = Math.min(...fastestEach);
   const fastestSec = Math.min(...times.flat());
-  const headers = ["Driver", "Average of " + lapCount, "Optimal", "Theoretical"].concat(times[0].map((_, i) => (i === 0 ? "Fastest" : String(i + 1))));
+  const summary = lapView === "summary";
+  const headers = summary
+    ? ["Driver", "Fastest", "Average", "Optimal", "Theoretical"]
+    : ["Driver"].concat(times[0].map((_, i) => (i === 0 ? "Fastest" : String(i + 1))));
+  const body = summary
+    ? DATA.drivers.map((driver, d) => "<tr><td>" + driver + "</td><td>" +
+        cell(DATA.lapTime[d][0], fastestEach[d] === bestFastest) + "</td><td>" +
+        cell(fmtLap(lapAvg[d]), lapAvg[d] === bestAvg) + "</td><td>" +
+        cell(fmtLap(optimal[d]), optimal[d] === bestOptimal) + "</td><td>" +
+        cell(fmtLap(theoretical[d]), theoretical[d] === bestTheoretical) + "</td></tr>").join("")
+    : DATA.drivers.map((driver, d) => "<tr><td>" + driver + "</td>" +
+        times[d].map((sec, i) => "<td>" + cell(DATA.lapTime[d][i], sec === fastestSec) + "</td>").join("") +
+        "</tr>").join("");
   document.getElementById("laps").innerHTML = "<table><thead><tr>" +
     headers.map(h => "<th>" + h + "</th>").join("") +
-    "</tr></thead><tbody>" +
-    DATA.drivers.map((driver, d) => "<tr><td>" + driver + "</td><td>" +
-      cell(fmtLap(lapAvg[d]), lapAvg[d] === bestAvg) + "</td><td>" +
-      cell(fmtLap(optimal[d]), optimal[d] === bestOptimal) + "</td><td>" +
-      cell(fmtLap(theoretical[d]), theoretical[d] === bestTheoretical) + "</td>" +
-      times[d].map((sec, i) => "<td>" + cell(DATA.lapTime[d][i], sec === fastestSec) + "</td>").join("") +
-      "</tr>").join("") +
-    "</tbody></table>";
+    "</tr></thead><tbody>" + body + "</tbody></table>";
+  document.getElementById("optimal-note").hidden = !summary;
+  document.getElementById("stints").hidden = summary;
   document.getElementById("stints").textContent = DATA.drivers.map((driver, d) =>
     driver + ": " + DATA.stint[d].slice(0, lapCount).join(", ")).join(". ") + ".";
 }
@@ -283,6 +297,15 @@ function setCount(n) {
 
 document.querySelectorAll("#depth button").forEach(button => {
   button.addEventListener("click", () => setCount(Number(button.dataset.n)));
+});
+document.querySelectorAll("#lap-view button").forEach(button => {
+  button.addEventListener("click", () => {
+    lapView = button.dataset.view;
+    document.querySelectorAll("#lap-view button").forEach(item => {
+      item.classList.toggle("on", item === button);
+    });
+    renderLaps();
+  });
 });
 window.addEventListener("hashchange", () => render(cornerFromHash()));
 setCount(lapCount);
