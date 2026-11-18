@@ -41,6 +41,7 @@
   </div>
   <div class="scroll" id="laps"></div>
   <p class="muted small" id="stints"></p>
+  <p class="muted small" id="optimal-note">Optimal adds that driver's fastest of three sectors from these laps. The sectors split the lap in the middle of the front straight, the straight before Turn 4, and the straight before Turn 6. Theoretical adds the fastest time on every corner and every straight. Neither is a lap they drove.</p>
   <h2 id="title"></h2>
   <p class="small">Tap a turn.</p>
   <div class="pills" id="pills"></div>
@@ -125,17 +126,31 @@ function passIndex(laps) {
 const asked = Number(new URLSearchParams(location.search).get("n"));
 let lapCount = [3, 5, 10].includes(asked) ? asked : 3;
 
+function bestSum(driver, key) {
+  const laps = DATA[key][driver].slice(0, lapCount);
+  const count = laps[0].length;
+  let total = 0;
+  for (let i = 0; i < count; i++) total += Math.min(...laps.map(lap => lap[i]));
+  return total;
+}
+
 function renderLaps() {
   const times = DATA.lapSec.map(row => row.slice(0, lapCount));
   const lapAvg = times.map(row => average(row));
   const bestAvg = Math.min(...lapAvg);
+  const optimal = DATA.drivers.map((_, d) => bestSum(d, "thirds"));
+  const theoretical = DATA.drivers.map((_, d) => bestSum(d, "piece"));
+  const bestOptimal = Math.min(...optimal);
+  const bestTheoretical = Math.min(...theoretical);
   const fastestSec = Math.min(...times.flat());
-  const headers = ["Driver", "Average of " + lapCount].concat(times[0].map((_, i) => (i === 0 ? "Fastest" : String(i + 1))));
+  const headers = ["Driver", "Average of " + lapCount, "Optimal", "Theoretical"].concat(times[0].map((_, i) => (i === 0 ? "Fastest" : String(i + 1))));
   document.getElementById("laps").innerHTML = "<table><thead><tr>" +
     headers.map(h => "<th>" + h + "</th>").join("") +
     "</tr></thead><tbody>" +
     DATA.drivers.map((driver, d) => "<tr><td>" + driver + "</td><td>" +
-      cell(fmtLap(lapAvg[d]), lapAvg[d] === bestAvg) + "</td>" +
+      cell(fmtLap(lapAvg[d]), lapAvg[d] === bestAvg) + "</td><td>" +
+      cell(fmtLap(optimal[d]), optimal[d] === bestOptimal) + "</td><td>" +
+      cell(fmtLap(theoretical[d]), theoretical[d] === bestTheoretical) + "</td>" +
       times[d].map((sec, i) => "<td>" + cell(DATA.lapTime[d][i], sec === fastestSec) + "</td>").join("") +
       "</tr>").join("") +
     "</tbody></table>";
