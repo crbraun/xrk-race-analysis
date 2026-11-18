@@ -8,10 +8,26 @@
   :root { color-scheme: light; --ink: #1c1917; --muted: #57534e; --line: #e7e5e4; --purple: #7c3aed; --bg: #fafaf9; }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 ui-sans-serif, system-ui, sans-serif; }
-  main { max-width: 920px; margin: 0 auto; padding: 28px 20px 64px; }
+  main { max-width: 1240px; margin: 0 auto; padding: 28px 20px 64px; }
   h1 { font-size: 28px; line-height: 1.2; margin: 0 0 10px; }
   h2 { font-size: 22px; margin: 28px 0 10px; }
   h3 { font-size: 18px; margin: 18px 0 8px; }
+  .corner { display: grid; grid-template-columns: minmax(300px, 0.82fr) minmax(560px, 1.18fr); gap: 8px 20px; align-items: stretch; margin-top: 8px; }
+  #map { display: flex; min-height: 0; }
+  #map svg { flex: 1; height: 100%; max-height: none; }
+  .corner h2, .corner .hint, .corner #pills { grid-column: 1 / -1; }
+  .corner h2 { margin: 12px 0 0; }
+  .corner .hint { margin: 4px 0 0; }
+  .corner #pills { margin: 6px 0 4px; }
+  .corner h3 { margin: 0 0 2px; font-size: 16px; }
+  .corner h3 + h3, .corner .scroll + h3 { margin-top: 10px; }
+  .corner .note { margin: 0 0 6px; font-size: 13px; line-height: 1.35; }
+  .corner th, .corner td { padding: 3px 8px; font-size: 14px; }
+  .corner th { font-size: 12px; }
+  @media (max-width: 980px) {
+    .corner { grid-template-columns: 1fr; }
+    #map svg { height: auto; max-height: 240px; }
+  }
   p { margin: 0 0 10px; }
   .muted { color: var(--muted); }
   .small { font-size: 14px; }
@@ -46,16 +62,20 @@
   <div class="scroll" id="laps"></div>
   <p class="muted small" id="stints" hidden></p>
   <p class="muted small" id="optimal-note">Optimal adds that driver's fastest of three sectors from these laps. The sectors split the lap in the middle of the front straight, the straight before Turn 4, and the straight before Turn 6. Theoretical adds the fastest time on every corner and every straight. Neither is a lap they drove.</p>
-  <h2 id="title"></h2>
-  <p class="small">Tap a turn.</p>
-  <div class="pills" id="pills"></div>
-  <div id="map"></div>
-  <h3 id="avg-title">Average of the three laps</h3>
-  <p class="muted" id="note"></p>
-  <div class="scroll"><table id="corner"></table></div>
-  <h3>Fastest pass through this corner</h3>
-  <p class="muted" id="pass-note"></p>
-  <div class="scroll"><table id="pass"></table></div>
+  <section class="corner">
+    <h2 id="title"></h2>
+    <p class="small hint">Tap a turn.</p>
+    <div class="pills" id="pills"></div>
+    <div id="map"></div>
+    <div>
+      <h3 id="avg-title">Average of the three laps</h3>
+      <p class="muted note" id="note"></p>
+      <div class="scroll"><table id="corner"></table></div>
+      <h3>Fastest pass through this corner</h3>
+      <p class="muted note" id="pass-note"></p>
+      <div class="scroll"><table id="pass"></table></div>
+    </div>
+  </section>
 </main>
 <script src="data.js?v=3"></script>
 <script>
