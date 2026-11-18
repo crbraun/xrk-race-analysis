@@ -37,7 +37,6 @@
   th { font-size: 13px; color: var(--muted); font-weight: 600; }
   .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: white; }
   .best { color: var(--purple); font-weight: 700; }
-  .own { color: #15803d; font-weight: 700; }
   .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 12px; }
   .seg { display: inline-flex; border: 1px solid #d6d3d1; border-radius: 8px; overflow: hidden; background: white; }
   .seg button { border: 0; border-right: 1px solid var(--line); background: transparent; color: var(--ink); font: inherit; font-weight: 600; padding: 6px 12px; min-height: 36px; cursor: pointer; }
@@ -133,9 +132,8 @@ function bestMask(values, higher) {
   const mark = higher ? Math.max(...finite) : Math.min(...finite);
   return values.map(v => v != null && v === mark);
 }
-function cell(text, best, own) {
-  const cls = best ? "best" : own ? "own" : "";
-  return cls ? '<span class="' + cls + '">' + text + "</span>" : text;
+function cell(text, best) {
+  return best ? '<span class="best">' + text + "</span>" : text;
 }
 function cornerFromHash() {
   const hash = decodeURIComponent(location.hash.replace(/^#/, ""));
@@ -188,12 +186,9 @@ function renderLaps() {
         cell(fmtLap(lapAvg[d]), lapAvg[d] === bestAvg) + "</td><td>" +
         cell(fmtLap(optimal[d]), optimal[d] === bestOptimal) + "</td><td>" +
         cell(fmtLap(theoretical[d]), theoretical[d] === bestTheoretical) + "</td></tr>").join("")
-    : DATA.drivers.map((driver, d) => {
-        const ownBest = Math.min(...times[d]);
-        return "<tr><td>" + driver + "</td>" +
-          times[d].map((sec, i) => "<td>" + cell(DATA.lapTime[d][i], sec === fastestSec, sec === ownBest) + "</td>").join("") +
-          "</tr>";
-      }).join("");
+    : DATA.drivers.map((driver, d) => "<tr><td>" + driver + "</td>" +
+        times[d].map((sec, i) => "<td>" + cell(DATA.lapTime[d][i], sec === fastestSec) + "</td>").join("") +
+        "</tr>").join("");
   document.getElementById("laps").innerHTML = "<table><thead><tr>" +
     headers.map(h => "<th>" + h + "</th>").join("") +
     "</tr></thead><tbody>" + body + "</tbody></table>";
