@@ -37,9 +37,7 @@
   th { font-size: 13px; color: var(--muted); font-weight: 600; }
   .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: white; }
   .best { color: var(--purple); font-weight: 700; }
-  .bar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 4px 0 12px; }
-  .group { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
-  .bar .name { color: var(--muted); font-size: 13px; font-weight: 600; }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 12px; }
   .seg { display: inline-flex; border: 1px solid #d6d3d1; border-radius: 8px; overflow: hidden; background: white; }
   .seg button { border: 0; border-right: 1px solid var(--line); background: transparent; color: var(--ink); font: inherit; font-weight: 600; padding: 6px 12px; min-height: 36px; cursor: pointer; }
   .seg button:last-child { border-right: 0; }
@@ -58,13 +56,10 @@
   <p class="muted">Each driver's fastest clean laps from the AER weekend at Thunderbolt. Qualifying did not make this list, so every lap is from the 14-hour. This is the layout with no Turn 3 chicane. The GPS racing line is 2.15 mi. Turn 8 is the right-hand sweeper between 7 and 9, taken while accelerating, so it has no slow point of its own. 11b is the left between 11a and 12 and is the same. The shared apex is the slow point of that turn.</p>
   <p class="muted small">Brake point is meters before that apex, where brake pressure first stays up. Peak brake is the rise above the released pedal, in the logger's own units. Full throttle is meters after the apex where throttle stays at or above 98%. Top speed is the highest GPS speed in the 250 m before the apex. GPS is 10 Hz, so a few meters is inside the sample spacing. Source: AiM logs, 14 Nov 2026.</p>
   <div class="bar">
-    <div class="group">
-      <span class="name">Laps</span>
-      <div class="seg" id="depth" role="group" aria-label="Laps included">
-        <button class="on" type="button" data-n="3">Top 3</button>
-        <button type="button" data-n="5">Top 5</button>
-        <button type="button" data-n="10">Top 10</button>
-      </div>
+    <div class="seg" id="depth" role="group" aria-label="Laps included">
+      <button class="on" type="button" data-n="3">Top 3</button>
+      <button type="button" data-n="5">Top 5</button>
+      <button type="button" data-n="10">Top 10</button>
     </div>
     <div class="seg quiet" id="lap-view" role="group" aria-label="Table">
       <button class="on" type="button" data-view="summary">Summary</button>
