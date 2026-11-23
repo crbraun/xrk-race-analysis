@@ -35,6 +35,7 @@
   th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
   th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: white; }
   th { font-size: 13px; color: var(--muted); font-weight: 600; }
+  th.group { text-align: center; border-bottom: 1px solid var(--line); }
   .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: white; }
   .best { color: var(--purple); font-weight: 700; }
   .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 12px; }
@@ -165,6 +166,11 @@ function bestSum(driver, key) {
   return total;
 }
 
+function bestSector(driver, index) {
+  const laps = DATA.thirds[driver].slice(0, lapCount);
+  return Math.min(...laps.map(lap => lap[index]));
+}
+
 function renderLaps() {
   const times = DATA.lapSec.map(row => row.slice(0, lapCount));
   const lapAvg = times.map(row => average(row));
@@ -176,22 +182,29 @@ function renderLaps() {
   const fastestEach = times.map(row => row[0]);
   const bestFastest = Math.min(...fastestEach);
   const fastestSec = Math.min(...times.flat());
+  const sectors = [0, 1, 2].map(index => DATA.drivers.map((_, d) => bestSector(d, index)));
+  const bestSectors = sectors.map(column => Math.min(...column));
   const summary = lapView === "summary";
-  const headers = summary
-    ? ["Driver", "Fastest", "Average", "Optimal", "Theoretical"]
-    : ["Driver"].concat(times[0].map((_, i) => (i === 0 ? "Fastest" : String(i + 1))));
+  const headers = ["Driver"].concat(times[0].map((_, i) => (i === 0 ? "Fastest" : String(i + 1))));
+  const sectorCells = (d) => sectors.map((column, index) =>
+    "<td>" + cell(column[d].toFixed(3), column[d] === bestSectors[index]) + "</td>").join("");
   const body = summary
     ? DATA.drivers.map((driver, d) => "<tr><td>" + driver + "</td><td>" +
         cell(DATA.lapTime[d][0], fastestEach[d] === bestFastest) + "</td><td>" +
         cell(fmtLap(lapAvg[d]), lapAvg[d] === bestAvg) + "</td><td>" +
-        cell(fmtLap(optimal[d]), optimal[d] === bestOptimal) + "</td><td>" +
+        cell(fmtLap(optimal[d]), optimal[d] === bestOptimal) + "</td>" +
+        sectorCells(d) + "<td>" +
         cell(fmtLap(theoretical[d]), theoretical[d] === bestTheoretical) + "</td></tr>").join("")
     : DATA.drivers.map((driver, d) => "<tr><td>" + driver + "</td>" +
         times[d].map((sec, i) => "<td>" + cell(DATA.lapTime[d][i], sec === fastestSec) + "</td>").join("") +
         "</tr>").join("");
-  document.getElementById("laps").innerHTML = "<table><thead><tr>" +
-    headers.map(h => "<th>" + h + "</th>").join("") +
-    "</tr></thead><tbody>" + body + "</tbody></table>";
+  const head = summary
+    ? "<tr><th rowspan=\"2\">Driver</th><th rowspan=\"2\">Fastest</th><th rowspan=\"2\">Average</th><th rowspan=\"2\">Optimal</th>" +
+      "<th class=\"group\" colspan=\"3\">Best sector</th><th rowspan=\"2\">Theoretical</th></tr>" +
+      "<tr><th>1</th><th>2</th><th>3</th></tr>"
+    : "<tr>" + headers.map(h => "<th>" + h + "</th>").join("") + "</tr>";
+  document.getElementById("laps").innerHTML = "<table><thead>" + head +
+    "</thead><tbody>" + body + "</tbody></table>";
   document.getElementById("optimal-note").hidden = !summary;
 }
 
